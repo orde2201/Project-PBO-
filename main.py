@@ -3,6 +3,8 @@ import random
 import cursor
 import base
 import text
+from health_bar import BarHp
+
 
 # Inisialisasi pygame
 pygame.init()
@@ -25,19 +27,15 @@ selected_mode = None
 
 # Class utama untuk semua fitur game
 class CancerHunter():
-    
     #tempat kode menu start
     @staticmethod
     def menu(screen, event, cursor_x, cursor_y):
-        """Menampilkan menu utama dengan tombol START"""
         #mengakses base_structure global
         global base_structure
-
         # Load background dan cursor
         menu_background = pygame.image.load("assets/menu_background.png").convert()
         # Tampilkan Background
         screen.blit(menu_background, (0, 0))
-
         # Tampilkan tombol START
         typing = "START"
         start_rect = text.font(typing,screen,500,200,200)
@@ -65,7 +63,7 @@ class CancerHunter():
         # Load cursor
         cursor.cursor_menu()
         # Daftar mode dan posisi tombol
-        font = pygame.font.Font(None, 150)
+        font = pygame.font.Font("assets/HelpMe.ttf", 100)
         texts = ["Easy", "Medium", "Hard"]
         positions = [150, 300, 450]
         option_rects = []
@@ -203,15 +201,19 @@ class CancerHunter():
             text = font.render("VICTORY! All cancers defeated!", True, (255, 255, 255))
             screen.blit(text, (100, 300))
 
+    cancer_type = None
     @staticmethod
     def battle_mode():
         global cursor_x, cursor_y, base_structure, selected_mode
         pygame.mouse.set_visible(True)
         #membuat object player
+    
         if not hasattr(CancerHunter, 'player'):
             CancerHunter.player = base.Player("arthur")
         if not hasattr(CancerHunter, 'cancer'):
-            CancerHunter.cancer = base.Cancer("normal_cancer", 1)
+            CancerHunter.cancer_type = random.choices(["normal_cancer","high_cancer"],weights=[80,20],k=1)[0]
+            print(CancerHunter.cancer_type)
+            CancerHunter.cancer = base.Cancer(CancerHunter.cancer_type, 1)
 
         player = CancerHunter.player
         cancer = CancerHunter.cancer
@@ -237,21 +239,25 @@ class CancerHunter():
 
         #stats player
         ##stats hp
-        hp_now = str(player.get_hp())
-        hp_max = str(player.get_max_hp())
-        hp = text.font(f"HP : {hp_now}/{hp_max}",screen,400,450,20)
+        hp_now = (player.get_hp())
+        hp_max = (player.get_max_hp())
+        #hp = text.font(f"HP : {hp_now}/{hp_max}",screen,400,450,20)
+        BarHp.bar_hp(screen,0,350,200,20,"red","green",hp_now,hp_max)
 
         ##stats energy
-        energy_now = str(player.get_energy())
-        energy_max = str(player.get_max_energy())
-        hp = text.font(f"Energy : {energy_now}/{energy_max}",screen,800,450,20)
+        energy_now = (player.get_energy())
+        energy_max = (player.get_max_energy())
+        #hp = text.font(f"Energy : {energy_now}/{energy_max}",screen,800,450,20)
+        BarHp.bar_hp(screen,0,380,200,20,"red","blue",energy_now,energy_max)
     
         #stats cancer
         ##stats hp
-        hp_now = str(cancer.get_hp())
-        hp_max = str(cancer.get_max_hp())
-        hp = text.font(f"HP : {hp_now}/{hp_max}",screen,700,100,20)
-
+        name_cancer = (cancer.get_name())
+        name = text.font(name_cancer,screen,800,50,30)
+        hp_now_cancer = (cancer.get_hp())
+        hp_max_cancer = (cancer.get_max_hp())
+        hp = text.font(f"HP : {hp_now_cancer}/{hp_max_cancer}",screen,800,200,40)
+        BarHp.bar_hp(screen,700,80,200,30,"red","green",hp_now_cancer,hp_max_cancer)
 
 
         #battle
@@ -268,7 +274,8 @@ class CancerHunter():
             cursor_x, cursor_y = event.pos
         if event and event.type == pygame.MOUSEBUTTONDOWN:
             if attack_cancer.collidepoint(event.pos):
-                player.attack(cancer)
+                player.attack(cancer,screen)
+                cancer.attack(player)
                 
                 condition_player = player.is_alive()
                 condition_cancer = cancer.is_alive()
@@ -301,6 +308,7 @@ while True :
         del CancerHunter.camera
     if hasattr(CancerHunter, 'cancers'):
         del CancerHunter.cancers
+        del CancerHunter.cancer
 
     done = False
     while not done:
