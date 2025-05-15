@@ -188,9 +188,10 @@ class CancerHunter():
                 cancer['visible'] = False
 
         # Gambar karakter di tengah layar
-        player_rect = player_img.get_rect(center=(screen_width // 2, screen_height // 2))
-        screen.blit(player_img, player_rect)
-
+        player_draw_x = CancerHunter.player_pos[0] - CancerHunter.camera[0]
+        player_draw_y = CancerHunter.player_pos[1] - CancerHunter.camera[1]
+        screen.blit(player_img, (player_draw_x - 25, player_draw_y - 25))  # -25 agar titik tengah pas
+        
         # Info sisa musuh
         font = pygame.font.Font(None, 36)
         text = font.render(f"Cancers remaining: {len(CancerHunter.cancers)}", True, (255, 255, 255))
