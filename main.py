@@ -7,7 +7,7 @@ from health_bar import BarHp
 
 
 # Inisialisasi pygame
-pygame.init()
+
 
 #menyembunyikan kursor mouse agar yang bergerak hanya gambar menu_cursor.png
 pygame.mouse.set_visible(False)
