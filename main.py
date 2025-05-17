@@ -12,6 +12,9 @@ pygame.init()
 #menyembunyikan kursor mouse agar yang bergerak hanya gambar menu_cursor.png
 pygame.mouse.set_visible(False)
 
+# variabel global untuk log
+battle_log = ""
+
 # Posisi awal kursor,kursor awalnya diletakan di luar screen agar tidak terlihat
 cursor_x = -40
 cursor_y = +40
