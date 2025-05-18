@@ -1,56 +1,17 @@
+import sys
 import pygame
 import random
 import cursor
 import base
 import text
 from health_bar import BarHp
-from character.cancer import Cancer
-from character.player import PlayerMain
 
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((800, 600))
-    pygame.display.set_caption("Game Skill Energy Demo")
 
-    player = PlayerMain("Arthur")
-    enemy = Cancer("normal_cancer", 1)
-
-    running = True
-    clock = pygame.time.Clock()
-
-    while running:
-        screen.fill((0, 0, 0))
-        player.player_image(screen)
-        enemy.cancer_image(screen)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-            # Pencet SPACE untuk pakai skill basic attack
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    if player.use_skill("basic_attack", enemy, screen):
-                        print("Skill basic attack berhasil digunakan.")
-                    else:
-                        print("Gagal menggunakan skill basic attack.")
-                    print(f"Energi pemain sekarang: {player.get_energy()}")
-
-        pygame.display.flip()
-        clock.tick(60)
-
-    pygame.quit()
-
-if __name__ == "__main__":
-    main()
 # Inisialisasi pygame
 pygame.init()
 
 #menyembunyikan kursor mouse agar yang bergerak hanya gambar menu_cursor.png
 pygame.mouse.set_visible(False)
-
-# variabel global untuk log
-battle_log = ""
 
 # Posisi awal kursor,kursor awalnya diletakan di luar screen agar tidak terlihat
 cursor_x = -40
@@ -245,6 +206,8 @@ class CancerHunter():
     cancer_type = None
     @staticmethod
     def battle_mode():
+        global combat_logs
+        global combat_logs, is_guarding
         global cursor_x, cursor_y, base_structure, selected_mode
         pygame.mouse.set_visible(True)
         #membuat object player
@@ -329,7 +292,11 @@ class CancerHunter():
                 
                 
             if guard_from_cancer.collidepoint(event.pos):
-                print("guard")
+                is_guarding = True
+                combat_logs.append(f"{player.get_name()} is guarding!")
+                guard(cancer, player, combat_logs)  # type: ignore # ← Panggil fungsi guard di sini
+
+
             if skill_cancer.collidepoint(event.pos):
                 print("skill")
 
