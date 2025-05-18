@@ -4,8 +4,45 @@ import cursor
 import base
 import text
 from health_bar import BarHp
+from character.cancer import Cancer
+from character.player import PlayerMain
 
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode((800, 600))
+    pygame.display.set_caption("Game Skill Energy Demo")
 
+    player = PlayerMain("Arthur")
+    enemy = Cancer("normal_cancer", 1)
+
+    running = True
+    clock = pygame.time.Clock()
+
+    while running:
+        screen.fill((0, 0, 0))
+        player.player_image(screen)
+        enemy.cancer_image(screen)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            # Pencet SPACE untuk pakai skill basic attack
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    if player.use_skill("basic_attack", enemy, screen):
+                        print("Skill basic attack berhasil digunakan.")
+                    else:
+                        print("Gagal menggunakan skill basic attack.")
+                    print(f"Energi pemain sekarang: {player.get_energy()}")
+
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()
+
+if __name__ == "__main__":
+    main()
 # Inisialisasi pygame
 pygame.init()
 
