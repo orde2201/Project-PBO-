@@ -243,8 +243,10 @@ class CancerHunter():
 
         #stats player
         ##stats hp
+        lvl = (player.get_level())
         hp_now = (player.get_hp())
         hp_max = (player.get_max_hp())
+        text.font(f"level {lvl}",screen,100,560,30)
         #hp = text.font(f"HP : {hp_now}/{hp_max}",screen,400,450,20)
         BarHp.bar_hp(screen,0,350,200,20,"red","green",hp_now,hp_max)
 
@@ -260,27 +262,47 @@ class CancerHunter():
         name = text.font(name_cancer,screen,800,50,30)
         hp_now_cancer = (cancer.get_hp())
         hp_max_cancer = (cancer.get_max_hp())
-        hp = text.font(f"HP : {hp_now_cancer}/{hp_max_cancer}",screen,800,200,40)
-        BarHp.bar_hp(screen,700,80,200,30,"red","green",hp_now_cancer,hp_max_cancer)
+        hp = text.font(f"HP : {hp_now_cancer}/{hp_max_cancer}",screen,820,170,30)
+        BarHp.bar_hp(screen,700,90,200,30,"red","green",hp_now_cancer,hp_max_cancer)
 
 
         #battle
         typing = "Attack"
-        attack_cancer = text.font(typing,screen,400,550,50)
+        attack_cancer = text.font(typing,screen,400,465,40)
 
         typing = "Guard"
-        guard_from_cancer = text.font(typing,screen,600,550,50)
+        guard_from_cancer = text.font(typing,screen,400,540,40)
 
         typing = "Skill"
-        skill_cancer = text.font(typing,screen,800,550,50)
+        skill_cancer = text.font(typing,screen,600,465,40)
+
+        typing = "ultimate"
+        ultimate_cancer = text.font(typing,screen,650,540,40)
 
         if event and event.type == pygame.MOUSEMOTION:
             cursor_x, cursor_y = event.pos
         if event and event.type == pygame.MOUSEBUTTONDOWN:
             if attack_cancer.collidepoint(event.pos):
                 player.attack(cancer,screen)
-                cancer.attack(player)
+                cancer.attack(player,screen)
                 
+                condition_player = player.is_alive()
+                condition_cancer = cancer.is_alive()
+                if condition_player != True :
+                    print("game over")
+                    return True
+                if condition_cancer != True :
+                    print("win")
+                    player.level_up()
+                    return 2
+                
+                
+            if guard_from_cancer.collidepoint(event.pos):
+                is_guarding = True
+                #combat_logs.append(f"{player.get_name()} is guarding!")
+                guard(cancer, player, combat_logs)  # type: ignore # ← Panggil fungsi guard di sini
+            if skill_cancer.collidepoint(event.pos):
+                player.use_skill("basic_skill",cancer,screen)
                 condition_player = player.is_alive()
                 condition_cancer = cancer.is_alive()
                 if condition_player != True :
@@ -290,15 +312,18 @@ class CancerHunter():
                     print("win")
                     return 2
                 
+
+            if ultimate_cancer.collidepoint(event.pos):
+                player.use_skill("special_attack",cancer,screen)
+                condition_player = player.is_alive()
+                condition_cancer = cancer.is_alive()
+                if condition_player != True :
+                    print("game over")
+                    return True
+                if condition_cancer != True :
+                    print("win")
+                    return 2
                 
-            if guard_from_cancer.collidepoint(event.pos):
-                is_guarding = True
-                combat_logs.append(f"{player.get_name()} is guarding!")
-                guard(cancer, player, combat_logs)  # type: ignore # ← Panggil fungsi guard di sini
-
-
-            if skill_cancer.collidepoint(event.pos):
-                print("skill")
 
 
         #screen.blit(cursor.cursor_menu(), (cursor_x - 50, cursor_y - 50))
@@ -344,6 +369,8 @@ while True :
                 base_structure = 3
                 if hasattr(CancerHunter, 'cancers'):
                     del CancerHunter.cancer
+        elif base_structure == 5:
+            pass
         # Update layar
         pygame.display.flip()
         clock.tick(30)
