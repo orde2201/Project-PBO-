@@ -5,7 +5,7 @@ import basic_attack
 
 # --- Abstract base Character class ---
 class Character(ABC):
-    def __init__(self, name, level, hp, attack, defense, max_hp, energy, max_energy):
+    def _init_(self, name, level, hp, attack, defense, max_hp, energy, max_energy):
         self.__name = name
         self.__level = level
         self.__hp = hp
@@ -19,7 +19,7 @@ class Character(ABC):
         return self.__energy
 
     def set_energy(self, energy):
-        self.__energy = max(0, min(energy, self.__max_energy))
+        self._energy = max(0, min(energy, self._max_energy))
 
     def get_max_energy(self):
         return self.__max_energy
@@ -49,7 +49,7 @@ class Character(ABC):
         return self.__hp
 
     def set_hp(self, hp):
-        self.__hp = max(0, min(hp, self.__max_hp))
+        self._hp = max(0, min(hp, self._max_hp))
 
     def get_attack(self):
         return self.__attack
@@ -74,19 +74,19 @@ class Character(ABC):
 
 # --- Player class ---
 class Player(Character):
-    def __init__(self, name):
-        super().__init__(name, level=1, hp=100, attack=10, defense=10, max_hp=100, energy=100, max_energy=100)
+    def _init_(self, name):
+        super()._init_(name, level=1, hp=100, attack=10, defense=10, max_hp=100, energy=100, max_energy=100)
         self.__experience = 0
         self.skill_energy_cost = {
-            "basic_attack": 20,
+            "basic_skill": 10,
             "special_attack": 50,
         }
 
     @staticmethod
     def player_image(screen):
         player_image = pygame.image.load("assets/player_image.png")
-        player_image_size = pygame.transform.scale(player_image, (200, 200))
-        screen.blit(player_image_size, (10, 400))
+        player_image_size = pygame.transform.scale(player_image, (160, 160))
+        screen.blit(player_image_size, (50, 420))
 
     def level_up(self):
         self.set_level(self.get_level() + 1)
@@ -100,13 +100,14 @@ class Player(Character):
 
     def attack(self, cancer, screen=None):
         if screen:
-            basic_attack.attack_animation(screen)
+            asset = "assets/slash_basic/warrior_skill1_frame"
+            basic_attack.attack_animation(screen,10,asset)
         damage = random.randint(self.get_attack() - 2, self.get_attack() + 2)
         print(f"{self.get_name()} attacks {cancer.get_name()} for {damage} damage!")
         cancer.set_hp(cancer.get_hp() - damage)
         return damage
 
-    def use_skill(self, skill_name, target):
+    def use_skill(self, skill_name, target,screen):
         cost = self.skill_energy_cost.get(skill_name, None)
         if cost is None:
             print(f"Skill {skill_name} not found.")
@@ -117,12 +118,18 @@ class Player(Character):
 
         self.set_energy(self.get_energy() - cost)
 
-        if skill_name == "basic_attack":
-            damage = self.get_attack()
+        if skill_name == "basic_skill":
+            asset = "assets/slash_skill/warrior_skill4_frame"
+            basic_attack.attack_animation(screen,7,asset)
+            damage = self.get_attack() * 3
             target.set_hp(target.get_hp() - damage)
             print(f"Used skill {skill_name}, dealt {damage} damage.")
         elif skill_name == "special_attack":
-            damage = self.get_attack() * 2
+            asset = "assets/slash_skill/warrior_skill4_frame"
+            basic_attack.attack_animation(screen,7,asset)
+            asset = "assets/slash_basic/warrior_skill1_frame"
+            basic_attack.attack_animation(screen,10,asset)
+            damage = self.get_attack() * 5
             target.set_hp(target.get_hp() - damage)
             print(f"Used skill {skill_name}, dealt {damage} damage.")
 
@@ -137,7 +144,7 @@ class Player(Character):
 
 # --- Cancer (Monster) class ---
 class Cancer(Character):
-    def __init__(self, cancer_type, level):
+    def _init_(self, cancer_type, level):
         if cancer_type == "normal_cancer":
             hp = random.randint(80, 100)
             attack = random.randint(5, 10)
@@ -151,7 +158,7 @@ class Cancer(Character):
             attack = 5
             defense = 5
 
-        super().__init__(cancer_type.replace("_", " ").title(), level, hp, attack, defense, hp, energy=0, max_energy=0)
+        super()._init(cancer_type.replace("", " ").title(), level, hp, attack, defense, hp, energy=0, max_energy=0)
 
     @staticmethod
     def cancer_image(screen):
@@ -159,7 +166,9 @@ class Cancer(Character):
         cancer_size = pygame.transform.scale(cancer_image, (550, 550))
         screen.blit(cancer_size, (200, 0))
 
-    def attack(self, player):
+    def attack(self, player,screen):
+        asset = "assets/cancer_attack/warrior_skill5_frame"
+        basic_attack.attack_animation(screen,7,asset)
         damage = random.randint(self.get_attack() - 2, self.get_attack() + 2)
         print(f"{self.get_name()} attacks {player.get_name()} for {damage} damage!")
         player.set_hp(player.get_hp() - damage)
