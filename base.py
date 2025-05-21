@@ -4,16 +4,7 @@ import pygame
 import basic_attack
 
 # --- Abstract base Character class ---
-class Character(ABC):
-    def __init__(self, name, level, hp, attack, defense, max_hp, energy, max_energy):
-        self.__name = name
-        self.__level = level
-        self.__hp = hp
-        self.__attack = attack
-        self.__defense = defense
-        self.__max_hp = max_hp
-        self.__energy = energy
-        self.__max_energy = max_energy
+
 
     def get_energy(self):
         return self.__energy
