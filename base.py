@@ -102,20 +102,7 @@ import basic_attack
 
         self.set_energy(self.get_energy() - cost)
 
-        if skill_name == "basic_skill":
-            asset = "assets/slash_skill/warrior_skill4_frame"
-            basic_attack.attack_animation(screen,7,asset)
-            damage = self.get_attack() * 3
-            target.set_hp(target.get_hp() - damage)
-            print(f"Used skill {skill_name}, dealt {damage} damage.")
-        elif skill_name == "special_attack":
-            asset = "assets/slash_skill/warrior_skill4_frame"
-            basic_attack.attack_animation(screen,7,asset)
-            asset = "assets/slash_basic/warrior_skill1_frame"
-            basic_attack.attack_animation(screen,10,asset)
-            damage = self.get_attack() * 5
-            target.set_hp(target.get_hp() - damage)
-            print(f"Used skill {skill_name}, dealt {damage} damage.")
+        
 
         return True
 
@@ -150,13 +137,7 @@ class Cancer(Character):
         cancer_size = pygame.transform.scale(cancer_image, (550, 550))
         screen.blit(cancer_size, (200, 0))
 
-    def attack(self, player,screen):
-        asset = "assets/cancer_attack/warrior_skill5_frame"
-        basic_attack.attack_animation(screen,7,asset)
-        damage = random.randint(self.get_attack() - 2, self.get_attack() + 2)
-        print(f"{self.get_name()} attacks {player.get_name()} for {damage} damage!")
-        player.set_hp(player.get_hp() - damage)
-        return damage
+    
 
     def is_alive(self):
         return self.get_hp() > 0
