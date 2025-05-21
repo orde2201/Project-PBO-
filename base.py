@@ -64,14 +64,7 @@ import basic_attack
 
 
 # --- Player class ---
-class Player(Character):
-    def __init__(self, name):
-        super().__init__(name, level=1, hp=100, attack=10, defense=10, max_hp=100, energy=100, max_energy=100)
-        self.__experience = 0
-        self.skill_energy_cost = {
-            "basic_skill": 10,
-            "special_attack": 50,
-        }
+
 
     @staticmethod
     def player_image(screen):
