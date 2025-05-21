@@ -298,9 +298,8 @@ class CancerHunter():
                 
                 
             if guard_from_cancer.collidepoint(event.pos):
-                is_guarding = True
-                #combat_logs.append(f"{player.get_name()} is guarding!")
-                guard(cancer, player, combat_logs)  # type: ignore # ← Panggil fungsi guard di sini
+                player.guard()
+
             if skill_cancer.collidepoint(event.pos):
                 player.use_skill("basic_skill",cancer,screen)
                 condition_player = player.is_alive()
