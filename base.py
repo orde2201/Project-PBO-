@@ -6,61 +6,7 @@ import basic_attack
 # --- Abstract base Character class ---
 
 
-    def get_energy(self):
-        return self.__energy
-
-    def set_energy(self, energy):
-        self.__energy = max(0, min(energy, self.__max_energy))
-
-    def get_max_energy(self):
-        return self.__max_energy
-
-    def set_max_energy(self, max_energy):
-        self.__max_energy = max_energy
-
-    def get_max_hp(self):
-        return self.__max_hp
-
-    def set_max_hp(self, max_hp):
-        self.__max_hp = max_hp
-
-    def get_name(self):
-        return self.__name
-
-    def set_name(self, name):
-        self.__name = name
-
-    def get_level(self):
-        return self.__level
-
-    def set_level(self, level):
-        self.__level = level
-
-    def get_hp(self):
-        return self.__hp
-
-    def set_hp(self, hp):
-        self.__hp = max(0, min(hp, self.__max_hp))
-
-    def get_attack(self):
-        return self.__attack
-
-    def set_attack(self, attack):
-        self.__attack = attack
-
-    def get_defense(self):
-        return self.__defense
-
-    def set_defense(self, defense):
-        self.__defense = defense
-
-    @abstractmethod
-    def attack(self, target):
-        pass
-
-    @abstractmethod
-    def is_alive(self):
-        return self.get_hp() > 0
+   
 
 
 # --- Player class ---
