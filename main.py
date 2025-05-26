@@ -6,7 +6,6 @@ import base
 import text
 from health_bar import BarHp
 
-
 # Inisialisasi pygame
 pygame.init()
 
@@ -282,46 +281,57 @@ class CancerHunter():
         if event and event.type == pygame.MOUSEMOTION:
             cursor_x, cursor_y = event.pos
         if event and event.type == pygame.MOUSEBUTTONDOWN:
+            #bassic attack
             if attack_cancer.collidepoint(event.pos):
-                player.attack(cancer,screen)
-                cancer.attack(player,screen)
                 
-                condition_player = player.is_alive()
+                player.attack(cancer,screen)
                 condition_cancer = cancer.is_alive()
-                if condition_player != True :
-                    print("game over")
-                    return True
                 if condition_cancer != True :
                     print("win")
                     player.level_up()
                     return 2
                 
-                
+                cancer.attack(player,screen)
+                condition_player = player.is_alive()
+                if condition_player != True :
+                    print("game over")
+                    return True
+            
+            #guard
             if guard_from_cancer.collidepoint(event.pos):
                 player.guard()
+                cancer.attack(player,screen)
+                condition_player = player.is_alive()
+                if condition_player != True :
+                    print("game over")
+                    return True
 
             if skill_cancer.collidepoint(event.pos):
-                player.use_skill("basic_skill",cancer,screen)
-                condition_player = player.is_alive()
-                condition_cancer = cancer.is_alive()
-                if condition_player != True :
-                    print("game over")
-                    return True
-                if condition_cancer != True :
-                    print("win")
-                    return 2
-                
+                enenrgy_empty = player.use_skill("basic_skill",cancer,screen)
+                if enenrgy_empty == True :
+                    condition_cancer = cancer.is_alive()
+                    if condition_cancer != True :
+                        print("win")
+                        return 2
+                    
+                    cancer.attack(player,screen)
+                    condition_player = player.is_alive()
+                    if condition_player != True :
+                        print("game over")
+                        return True
 
             if ultimate_cancer.collidepoint(event.pos):
-                player.use_skill("special_attack",cancer,screen)
-                condition_player = player.is_alive()
-                condition_cancer = cancer.is_alive()
-                if condition_player != True :
-                    print("game over")
-                    return True
-                if condition_cancer != True :
-                    print("win")
-                    return 2
+                enenrgy_empty = player.use_skill("special_attack",cancer,screen)
+                if enenrgy_empty == True :
+                    condition_cancer = cancer.is_alive()
+                    if condition_cancer != True :
+                        print("win")
+                        return 2
+                    cancer.attack(player,screen)
+                    condition_player = player.is_alive()
+                    if condition_player != True :
+                        print("game over")
+                        return True
                 
 
 
