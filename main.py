@@ -383,3 +383,35 @@ while True :
         # Update layar
         pygame.display.flip()
         clock.tick(30)
+
+
+# Inisialisasi pygame dan mixer
+pygame.init()
+pygame.mixer.init()
+
+# Load backsound
+pygame.mixer.music.load("assets/sounds/background_music.mp3")
+pygame.mixer.music.set_volume(0.5)  # atur volume backsound (0.0 - 1.0)
+pygame.mixer.music.play(-1)  # loop terus
+
+# Load efek suara damage monster
+damage_sound = pygame.mixer.Sound("assets/sounds/monster_damage.wav")
+damage_sound.set_volume(0.7)
+
+def play_damage_sound():
+    damage_sound.play()
+
+# Game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        
+        # Contoh trigger efek suara dengan tekan space
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                play_damage_sound()
+
+pygame.quit()
+
