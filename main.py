@@ -9,11 +9,11 @@ from health_bar import BarHp
 # ======= Tambahan sound =======
 pygame.mixer.init()
 
-pygame.mixer.music.load("assets/sounds/background_music.mp3")
+pygame.mixer.music.load("assets/sounds/backgrounds game.mp3")
 pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play(-1)
 
-damage_sound = pygame.mixer.Sound("assets/sounds/monster_damage.wav")
+damage_sound = pygame.mixer.Sound("assets/sounds/monster damage.wav")
 damage_sound.set_volume(0.7)
 
 def play_damage_sound():
