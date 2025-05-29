@@ -6,19 +6,11 @@ import base
 import text
 from health_bar import BarHp
 
-# ======= Tambahan sound =======
+
+# Inisialisasi pygame
+pygame.init()
 pygame.mixer.init()
-
-pygame.mixer.music.load("assets/sounds/backgrounds game.mp3")
-pygame.mixer.music.set_volume(0.5)
-pygame.mixer.music.play(-1)
-
-damage_sound = pygame.mixer.Sound("assets/sounds/monster damage.wav")
-damage_sound.set_volume(0.7)
-
-def play_damage_sound():
-    damage_sound.play()
-# ===============================
+battle_bgm_channel = pygame.mixer.Channel(0)  # channel 0 khusus untuk musik battle
 
 #menyembunyikan kursor mouse agar yang bergerak hanya gambar menu_cursor.png
 pygame.mouse.set_visible(False)
@@ -36,12 +28,17 @@ base_structure = 1
 # Menyimpan mode yang dipilih (easy/medium/hard)
 selected_mode = None
 
+click_sound = pygame.mixer.Sound("assets/sound/click-button-166324.mp3")
+backsound_sound = pygame.mixer.Sound("assets/sound/battle-march-action-loop-6935.mp3")
+backsound_sound.play(-1)
+
 # Class utama untuk semua fitur game
 class CancerHunter():
     #tempat kode menu start
     @staticmethod
     def menu(screen, event, cursor_x, cursor_y):
         #mengakses base_structure global
+        global cancer_take_sound
         global base_structure
         # Load background dan cursor
         menu_background = pygame.image.load("assets/menu_background.png").convert()
@@ -58,6 +55,9 @@ class CancerHunter():
         # Deteksi klik pada tombol START
         if event and event.type == pygame.MOUSEBUTTONDOWN:
             if start_rect.collidepoint(event.pos):
+                click_sound.play()
+                #cancer_take_sound.stop()
+                #del cancer_take_sound
                 base_structure = 2  # Pindah ke menu pemilihan mode
 
         # Tampilkan kursor
@@ -96,6 +96,7 @@ class CancerHunter():
                 if rect.collidepoint(event.pos):
                     print(f"{label.capitalize()} mode selected")
                     selected_mode = label
+                    click_sound.play()
                     base_structure = 3  # Masuk ke explore mode
 
         # Tampilkan kursor
@@ -114,6 +115,10 @@ class CancerHunter():
         # Load cursor / karakter
         player_img = pygame.image.load("assets/main_cursor.png")
         player_img = pygame.transform.scale(player_img, (50, 50))
+
+        cancer_img = pygame.image.load("assets/player.png")
+        cancer_img = pygame.transform.scale(cancer_img, (50, 50))
+
 
         # Event
         keys = pygame.key.get_pressed()
@@ -151,7 +156,8 @@ class CancerHunter():
 
         # Blit map
         screen.blit(map_img, (-CancerHunter.camera[0], -CancerHunter.camera[1]))
-
+        ##test
+        
         # Jumlah musuh berdasarkan mode
         if selected_mode == "easy":
             sum_cancer = 5
@@ -159,7 +165,7 @@ class CancerHunter():
             sum_cancer = 10
         elif selected_mode == "hard":
             sum_cancer = 15
-
+        
         # Inisialisasi kanker jika belum ada
         if not hasattr(CancerHunter, 'cancers'):
             CancerHunter.cancers = []
@@ -185,9 +191,6 @@ class CancerHunter():
 
             if distance < 100:
                 cancer['visible'] = True
-                cancer_img = pygame.image.load("assets/player.png")
-                cancer_img = pygame.transform.scale(cancer_img, (50, 50))
-                # Gambar dengan kamera offset
                 screen.blit(cancer_img, (cancer['x'] - CancerHunter.camera[0] - 25,
                                         cancer['y'] - CancerHunter.camera[1] - 25))
                 if distance <20:
@@ -222,6 +225,7 @@ class CancerHunter():
         pygame.mouse.set_visible(True)
         #membuat object player
     
+        
         if not hasattr(CancerHunter, 'player'):
             CancerHunter.player = base.Player("arthur")
         if not hasattr(CancerHunter, 'cancer'):
@@ -241,7 +245,7 @@ class CancerHunter():
         screen.blit(text_cancer_size,(700,0))
 
 
-        base.Cancer.cancer_image(screen)
+        cancer.cancer_image(screen,cancer)
 
 
         text_background = pygame.image.load("assets/text_background.png")
@@ -296,12 +300,15 @@ class CancerHunter():
             if attack_cancer.collidepoint(event.pos):
                 
                 player.attack(cancer,screen)
+                #cancer.cancer_image(screen,cancer)
                 condition_cancer = cancer.is_alive()
                 if condition_cancer != True :
                     print("win")
                     player.level_up()
                     return 2
                 
+                text.font_animation("Cancer attack", screen, random.randrange(270,600), random.randrange(100,300), 60,"green", fade_in=False)
+
                 cancer.attack(player,screen)
                 condition_player = player.is_alive()
                 if condition_player != True :
@@ -317,12 +324,14 @@ class CancerHunter():
                     print("game over")
                     return True
 
+            #skill
             if skill_cancer.collidepoint(event.pos):
                 enenrgy_empty = player.use_skill("basic_skill",cancer,screen)
                 if enenrgy_empty == True :
                     condition_cancer = cancer.is_alive()
                     if condition_cancer != True :
                         print("win")
+                        player.level_up()
                         return 2
                     
                     cancer.attack(player,screen)
@@ -330,13 +339,14 @@ class CancerHunter():
                     if condition_player != True :
                         print("game over")
                         return True
-
+            #ultimate
             if ultimate_cancer.collidepoint(event.pos):
                 enenrgy_empty = player.use_skill("special_attack",cancer,screen)
                 if enenrgy_empty == True :
                     condition_cancer = cancer.is_alive()
                     if condition_cancer != True :
                         print("win")
+                        player.level_up()
                         return 2
                     cancer.attack(player,screen)
                     condition_player = player.is_alive()
@@ -354,7 +364,7 @@ clock = pygame.time.Clock()
 
 
 while True :
-    base_structure = 1  # kembali ke menu
+    base_structure = 1 # kembali ke menu
     if hasattr(CancerHunter, 'player'):
         del CancerHunter.player
     if hasattr(CancerHunter, 'camera'):
@@ -380,6 +390,7 @@ while True :
         elif base_structure == 3:
             CancerHunter.explore_mode()
         elif base_structure == 4:
+           
             condition = CancerHunter.battle_mode()
             if condition == True:  # player kalah
                 print("Game Over")
