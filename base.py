@@ -3,6 +3,10 @@ from abc import ABC, abstractmethod
 import pygame
 import basic_attack
 import text
+import test
+import sys
+
+#pygame.mixer.init()
 
 # --- Abstract base Character class ---
 class Character(ABC):
@@ -120,9 +124,12 @@ class Player(Character):
         screen.blit(player_image_size, (50, 420))
 
     def level_up(self):
-        self.set_level(self.get_level() + 1)
-        self.set_attack(self.get_attack() + 5)
-        self.set_defense(self.get_defense() + 5)
+        
+        if self.set_level != 10 :
+            self.set_level(self.get_level() + 1)
+        else :
+             text.font_animation("Level Maximum!", screen, random.randrange(270,600), random.randrange(100,300), 40,"white", fade_in=False)
+        self.set_attack(self.get_attack() + 2)
         self.set_max_hp(self.get_max_hp() + 5)
         self.set_hp(self.get_max_hp())  # restore hp to max when level up
         self.set_max_energy(self.get_max_energy() + 10)
@@ -134,9 +141,13 @@ class Player(Character):
             asset = "assets/slash_basic/warrior_skill1_frame"
             basic_attack.attack_animation(screen, 10, asset)
         damage = random.randint(self.get_attack() - 2, self.get_attack() + 2)
-        text.font_animation(f"{damage} damage!", screen, random.randrange(270,600), random.randrange(100,300), 40,"white", fade_in=False)
 
         cancer.set_hp(cancer.get_hp() - damage)
+        cancer.take_damage()
+        cancer.cancer_image(screen,cancer)
+        print("works")
+        text.font_animation(f"{damage} damage!", screen, random.randrange(270,600), random.randrange(100,300), 40,"white", fade_in=False)
+       
         return damage
    
     def use_skill(self, skill_name, target, screen):
@@ -154,12 +165,16 @@ class Player(Character):
         if skill_name == "basic_skill":
             asset = "assets/slash_skill/warrior_skill4_frame"
             basic_attack.attack_animation(screen, 7, asset)
+            target.take_damage()
+            target.cancer_image(screen,target)
             damage = self.get_attack() * 3
         elif skill_name == "special_attack":
             asset = "assets/slash_skill/warrior_skill4_frame"
             basic_attack.attack_animation(screen, 7, asset)
             asset = "assets/slash_basic/warrior_skill1_frame"
             basic_attack.attack_animation(screen, 10, asset)
+            target.take_damage()
+            target.cancer_image(screen,target)
             damage = self.get_attack() * 8
         else:
             return False
@@ -186,6 +201,7 @@ class Player(Character):
             self.set_is_guarding(False)
         
         self.set_hp(self.get_hp() - amount)
+        
         return amount
 
     def regenerate_energy(self, amount):
@@ -222,15 +238,58 @@ class Cancer(Character):
             max_energy=0,
             is_guarding=False)
 
-    @staticmethod
-    def cancer_image(screen):
-        cancer_image = pygame.image.load("assets/cancer.png")
-        cancer_size = pygame.transform.scale(cancer_image, (550, 550))
-        screen.blit(cancer_size, (200, 0))
+        self.blinking = False
+        self.blink_timer = 0
 
+    def cancer_image(self, screen, cancer):
+        current_time = pygame.time.get_ticks()
+        cancer_img = pygame.image.load("assets/cancer.png").convert_alpha()
+        cancer_size = pygame.transform.scale(cancer_img, (450, 420))
+        clock = pygame.time.Clock()
+        
+        if self.blinking:
+            # Hitung waktu blink (0.1 detik = 100 milidetik)
+            blink_interval = 80  # ms
+            start_time = current_time
+            
+            # Loop blocking selama waktu blink
+            while pygame.time.get_ticks() - start_time < (self.blink_timer - start_time):
+                current_time = pygame.time.get_ticks()
+                blink_phase = (current_time % (blink_interval * 2)) < blink_interval
+                
+                # Handle events
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                
+                # Clear screen (gunakan background color game Anda)
+                
+                # Gambar cancer sesuai fase
+                if blink_phase:  # Fase merah
+                    cancer_take_sound = pygame.mixer.Sound("assets/sound/monster damage.wav")
+                    cancer_take_sound.play()
+                    red_cancer = cancer_size.copy()
+                    red_cancer.fill((255, 0, 0, 0), special_flags=pygame.BLEND_RGBA_ADD)
+                    screen.blit(red_cancer, (200, 0))
+                else:  # Fase normal
+                    screen.blit(cancer_size, (200, 0))
+                    
+                pygame.display.flip()
+            clock.tick(60)  # 60 FPS
+            self.blinking = False
+            pygame.time.delay(100)
+        else:
+            # Gambar normal jika tidak blinking
+            screen.blit(cancer_size, (200, 0))
+                    
+    
     def attack(self, player, screen):
+        cancer_bite_sound = pygame.mixer.Sound("assets/sound/monster-bite-44538.mp3")
+        cancer_bite_sound.play()
         asset = "assets/cancer_attack/warrior_skill5_frame"
         basic_attack.attack_animation(screen, 7, asset)
+        
         
         damage = random.randint(self.get_attack() - 2, self.get_attack() + 2)
         
@@ -249,3 +308,10 @@ class Cancer(Character):
 
     def is_alive(self):
         return self.get_hp() > 0
+    
+    def take_damage(self):
+        # Setelah cancer menerima damage
+        self.blinking = True
+        self.blink_timer = pygame.time.get_ticks() + 300  # kedip selama 300 ms
+        print("cancer take dmg")
+        pass
