@@ -41,9 +41,13 @@ class CancerHunter:
         self._current_bgm = None  # Untuk melacak musik yang sedang diputar
         
         # Sound effects
-        self._click_sound = pygame.mixer.Sound("assets/sound/click-button-166324.mp3")
-        self._backsound = pygame.mixer.Sound("assets/sound/horror-thriller-2-336734.mp3")
-        self._battle_sound = pygame.mixer.Sound("assets/sound/battle-march-action-loop-6935.mp3")
+        try:
+            self._click_sound = pygame.mixer.Sound("assets/sound/click-button-166324.mp3")
+            self._backsound = pygame.mixer.Sound("assets/sound/horror-thriller-2-336734.mp3")
+            self._battle_sound = pygame.mixer.Sound("assets/sound/battle-march-action-loop-6935.mp3")
+        except pygame.error as e:
+            print(f"Error loading sound files: {e}")
+            sys.exit()
         
         # Mulai main BGM
         self._play_main_bgm()
@@ -88,9 +92,13 @@ class CancerHunter:
     def menu(self, screen, event):
         self._play_main_bgm()
         """Handle menu screen"""
-        # Load background
-        menu_background = pygame.image.load("assets/menu_background.png").convert()
-        screen.blit(menu_background, (0, 0))
+        try:
+            # Load background
+            menu_background = pygame.image.load("assets/menu_background.png").convert()
+            screen.blit(menu_background, (0, 0))
+        except pygame.error as e:
+            print(f"Error loading menu background: {e}")
+            return
         
         # Tampilkan tombol START
         typing = "START"
@@ -143,19 +151,26 @@ class CancerHunter:
         screen.blit(cursor.cursor_menu(), (self._cursor_x - 50, self._cursor_y - 50))
 
     def explore_mode(self, screen):
-        
         """Handle exploration gameplay"""
-        # Load map
-        map_img = pygame.image.load("assets/map1.png").convert()
-        map_img = pygame.transform.scale(map_img, (2000, 1200))
-        map_rect = map_img.get_rect()
-
+        try:
+            # Load map
+            map_img = pygame.image.load("assets/map1.png").convert()
+            map_img = pygame.transform.scale(map_img, (2000, 1200))
+            map_rect = map_img.get_rect()
+        except pygame.error as e:
+            print(f"Error loading map image: {e}")
+            return
+        
         # Load cursor / karakter
-        player_img = pygame.image.load("assets/main_cursor.png")
-        player_img = pygame.transform.scale(player_img, (50, 50))
+        try:
+            player_img = pygame.image.load("assets/main_cursor.png")
+            player_img = pygame.transform.scale(player_img, (50, 50))
 
-        cancer_img = pygame.image.load("assets/player.png")
-        cancer_img = pygame.transform.scale(cancer_img, (50, 50))
+            cancer_img = pygame.image.load("assets/player.png")
+            cancer_img = pygame.transform.scale(cancer_img, (50, 50))
+        except pygame.error as e:
+            print(f"Error loading player or cancer images: {e}")
+            return
 
         # Event
         keys = pygame.key.get_pressed()
@@ -257,22 +272,26 @@ class CancerHunter:
             self._cancer = base.Cancer(self._cancer_type, 1)
 
         # Layout
-        background = pygame.image.load("assets/battle_background.png")
-        background_size_battle = pygame.transform.scale(background, (1000, 1000))
-        screen.blit(background_size_battle, (0, -300))
+        try:
+            background = pygame.image.load("assets/battle_background.png")
+            background_size_battle = pygame.transform.scale(background, (1000, 1000))
+            screen.blit(background_size_battle, (0, -300))
 
-        text_cancer = pygame.image.load("assets/cancer_stats_back.png")
-        text_cancer_size = pygame.transform.scale(text_cancer, (300, 300))
-        screen.blit(text_cancer_size, (700, 0))
+            text_cancer = pygame.image.load("assets/cancer_stats_back.png")
+            text_cancer_size = pygame.transform.scale(text_cancer, (300, 300))
+            screen.blit(text_cancer_size, (700, 0))
 
-        self._cancer.cancer_image(screen, self._cancer)
+            self._cancer.cancer_image(screen, self._cancer)
 
-        text_background = pygame.image.load("assets/text_background.png")
-        text_background_size = pygame.transform.scale(text_background, (1000, 1000))
-        screen.blit(text_background_size, (100, 0))
+            text_background = pygame.image.load("assets/text_background.png")
+            text_background_size = pygame.transform.scale(text_background, (1000, 1000))
+            screen.blit(text_background_size, (100, 0))
 
-        # Player image
-        base.Player.player_image(screen)
+            # Player image
+            base.Player.player_image(screen)
+        except pygame.error as e:
+            print(f"Error loading battle images: {e}")
+            return
 
         # Stats player
         lvl = self._player.get_level()
@@ -326,7 +345,6 @@ class CancerHunter:
                 self._player.guard()
                 self._cancer.attack(self._player, screen)
                 if not self._player.is_alive():
-                   
                     print("game over")
                     return True
 
@@ -361,14 +379,14 @@ class CancerHunter:
                     if not self._player.is_alive():
                         print("game over")
                         return True
-            #buff
+            # Buff
             if buff_rect.collidepoint(event.pos):
-                buff_status=self._player.use_crit_buff(screen)
+                buff_status = self._player.use_crit_buff(screen)
                 if buff_status:
-                    base.attack(self._player,self._cancer, screen)
+                    base.attack(self._player, self._cancer, screen)
                     if not self._player.is_alive():
-                            print("game over")
-                            return True
+                        print("game over")
+                        return True
         return None
 
 
@@ -378,60 +396,60 @@ def main():
     clock = pygame.time.Clock()
     
     while True:
-        # Reset game state
-        game.set_base_structure(1)
-        
+        try:
+            # Reset game state
+            game.set_base_structure(1)
+            done = False
+            while not done:
+                event = None
+                for e in pygame.event.get():
+                    if e.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    event = e  # Simpan event terakhir
+                # Game structure
+                if game.get_base_structure() == 1:
+                    game.menu(screen, event)
+                elif game.get_base_structure() == 2:
+                    game.mode_select(screen, event)
+                elif game.get_base_structure() == 3:
+                    explore_status = game.explore_mode(screen)
+                    if explore_status:
+                        game.set_base_structure(1)
+                elif game.get_base_structure() == 4:
+                    condition = game.battle_mode(screen, event)
+                    if condition == True:  # player kalah
+                        # Tampilkan gambar game over selama 7 detik
+                        game_over_img = pygame.image.load("assets/game_over_vignet.png").convert()
+                        game_over_img = pygame.transform.scale(game_over_img, (1000, 600))
+                        
+                        start_time = pygame.time.get_ticks()
+                        while pygame.time.get_ticks() - start_time < 7000:
+                            for e in pygame.event.get():
+                                if e.type == pygame.QUIT:
+                                    pygame.quit()
+                                    sys.exit()
+                            screen.blit(game_over_img, (0, 0))
+                            pygame.display.flip()
+                            clock.tick(30)
 
-        done = False
-        while not done:
-            event = None
-            for e in pygame.event.get():
-                if e.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                event = e  # Simpan event terakhir
-
-            # Game structure
-            if game.get_base_structure() == 1:
-                game.menu(screen, event)
-            elif game.get_base_structure() == 2:
-                game.mode_select(screen, event)
-            elif game.get_base_structure() == 3:
-                explore_status = game.explore_mode(screen)
-                if explore_status :
-                    game.set_base_structure(1)
-            elif game.get_base_structure() == 4:
-                condition = game.battle_mode(screen, event)
-                if condition == True:  # player kalah
-                    # Tampilkan gambar game over selama 7 detik
-                    game_over_img = pygame.image.load("assets/game_over_vignet.png").convert()
-                    game_over_img = pygame.transform.scale(game_over_img, (1000, 600))
-                    
-                    start_time = pygame.time.get_ticks()
-                    while pygame.time.get_ticks() - start_time < 7000:
-                        for e in pygame.event.get():
-                            if e.type == pygame.QUIT:
-                                pygame.quit()
-                                sys.exit()
-                        screen.blit(game_over_img, (0, 0))
-                        pygame.display.flip()
-                        clock.tick(30)
-
-                    # Reset ke menu
-                    game.set_base_structure(1)
-                    game._player = None
-                    game._cancer = None
-                    game._cancers = []
-                    game._camera = [0, 0]
-                elif condition == 2:  # player menang
-                    game.set_base_structure(3)
-                    # Reset cancer stats for next battle
-                    game._cancer = None
-                    
-
-            # Update display
-            pygame.display.flip()
-            clock.tick(30)
+                        # Reset ke menu
+                        game.set_base_structure(1)
+                        game._player = None
+                        game._cancer = None
+                        game._cancers = []
+                        game._camera = [0, 0]
+                    elif condition == 2:  # player menang
+                        game.set_base_structure(3)
+                        # Reset cancer stats for next battle
+                        game._cancer = None
+                # Update display
+                pygame.display.flip()
+                clock.tick(30)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            pygame.quit()
+            sys.exit()
 
 if __name__ == "__main__":
     main()
