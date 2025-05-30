@@ -69,9 +69,6 @@ class Character(ABC):
     def set_is_guarding(self, is_guarding):
         self.__is_guarding = is_guarding
 
-    @abstractmethod
-    def guard(self, attacker, logs=None):
-        pass
 
     @abstractmethod
     def attack(self, target):
@@ -99,8 +96,37 @@ class Player(Character):
         self.__skill_energy_cost = {
             "basic_skill": 10,
             "special_attack": 50,
+            "crit_buff": 10
         }
+        self.__crit_buff_turns = 0
 
+    def is_crit_buff_active(self):
+        return self.__crit_buff_turns > 0
+
+    def decrement_crit_buff(self):
+        if self.__crit_buff_turns > 0:
+            self.__crit_buff_turns -= 1
+
+    def use_crit_buff(self, screen):
+    # Cek apakah buff sudah aktif
+        if self.__crit_buff_turns > 0:
+            text.font_animation("Crit Buff already active!", screen, random.randrange(270, 600),
+                                random.randrange(100, 300), 40, "orange", fade_in=False)
+            return False
+
+        cost = self.get_skill_energy_cost("crit_buff")
+        if self.get_energy() < cost:
+            text.font_animation("Not enough energy for Crit Buff.", screen, random.randrange(270, 600),
+                                random.randrange(100, 300), 40, "white", fade_in=False)
+            return False
+
+        self.set_energy(self.get_energy() - cost)
+        self.__crit_buff_turns = 3
+        text.font_animation("Crit Buff Activated!", screen, random.randrange(270, 600),
+                            random.randrange(100, 300), 40, "yellow", fade_in=False)
+        return True
+        
+    
     def get_experience(self):
         return self.__experience
 
@@ -124,23 +150,36 @@ class Player(Character):
              text.font_animation("Level Maximum!", screen, random.randrange(270,600), random.randrange(100,300), 40,"white", fade_in=False)
         self.set_attack(self.get_attack() + 2)
         self.set_max_hp(self.get_max_hp() + 5)
-        self.set_hp(self.get_max_hp())  # restore hp to max when level up
+        self.set_hp(self.get_hp()+30)  # restore hp to max when level up
         self.set_max_energy(self.get_max_energy() + 10)
-        self.set_energy(self.get_max_energy())  # fill energy to max when level up
+        self.set_energy(self.get_energy()+50)  # fill energy to max when level up
         print(f"{self.get_name()} has leveled up to level {self.get_level()}!")
 
     def attack(self, cancer, screen=None):
         if screen:
             asset = "assets/slash_basic/warrior_skill1_frame"
             basic_attack.attack_animation(screen, 10, asset)
-        damage = random.randint(self.get_attack() - 2, self.get_attack() + 2)
 
-        cancer.set_hp(cancer.get_hp() - damage)
+        crit = False
+        base_damage = random.randint(self.get_attack() - 2, self.get_attack() + 2)
+
+        if self.is_crit_buff_active():
+            if random.random() < 0.5:  # 40% chance crit saat buff aktif
+                base_damage *= 2
+                crit = True
+            self.decrement_crit_buff()
+
+        cancer.set_hp(cancer.get_hp() - base_damage)
         cancer.take_damage()
-        cancer.cancer_image(screen,cancer)
-        print("works")
-        text.font_animation(f"{damage} damage!", screen, random.randrange(270,600), random.randrange(100,300), 40,"white", fade_in=False)
-       
+        cancer.cancer_image(screen, cancer)
+
+        if crit:
+            text.font_animation(f"{base_damage} CRIT!!", screen, random.randrange(270, 600),
+                                random.randrange(100, 300), 40, "orange", fade_in=False)
+        else:
+            text.font_animation(f"{base_damage} damage!", screen, random.randrange(270, 600),
+                                random.randrange(100, 300), 40, "white", fade_in=False)
+        damage = base_damage
         return damage
    
     def use_skill(self, skill_name, target, screen):
@@ -148,11 +187,12 @@ class Player(Character):
         if cost is None:
             print(f"Skill {skill_name} not found.")
             return False
+        
         if self.get_energy() < cost:
             print("Not enough energy to use this skill.")
             text.font_animation("Not enough energy to use this skill.", screen, random.randrange(270,600), random.randrange(100,300), 40,"white", fade_in=False)
             return False
-
+        crit = False
         self.set_energy(self.get_energy() - cost)
 
         if skill_name == "basic_skill":
@@ -161,6 +201,12 @@ class Player(Character):
             target.take_damage()
             target.cancer_image(screen,target)
             damage = self.get_attack() * 3
+            if self.is_crit_buff_active():
+                if random.random() < 0.5:  # 40% chance crit saat buff aktif
+                    damage *= 2
+                    crit = True
+                self.decrement_crit_buff()
+            
         elif skill_name == "special_attack":
             asset = "assets/slash_skill/warrior_skill4_frame"
             basic_attack.attack_animation(screen, 7, asset)
@@ -169,12 +215,20 @@ class Player(Character):
             target.take_damage()
             target.cancer_image(screen,target)
             damage = self.get_attack() * 8
+            if self.is_crit_buff_active():
+                if random.random() < 0.5:  # 40% chance crit saat buff aktif
+                    damage *= 2
+                    crit = True
+                self.decrement_crit_buff()
         else:
             return False
-
-        target.set_hp(target.get_hp() - damage)
-        text.font_animation(f"{damage} damage!", screen, random.randrange(270,600), random.randrange(100,300), 40, "white",fade_in=False)
-
+        if crit:
+            text.font_animation(f"{damage} CRIT!!", screen, random.randrange(270, 600),
+                                random.randrange(100, 300), 40, "orange", fade_in=False)
+            target.set_hp(target.get_hp() - damage)
+        else:
+            text.font_animation(f"{damage} damage!", screen, random.randrange(270,600), random.randrange(100,300), 40, "white",fade_in=False)
+            target.set_hp(target.get_hp() - damage)
         return True
 
     def guard(self):
@@ -186,7 +240,7 @@ class Player(Character):
         
         chance = random.randint(1,10)
         if self.get_is_guarding():
-            if chance < 5:  # 60% chance to miss
+            if chance < 6:  # 60% chance to miss
                 
                 amount = 0
             else:
@@ -213,19 +267,22 @@ class Cancer(Character):
 
         if cancer_type == "normal_cancer":
             self.__cancer_img = pygame.image.load("assets/normal_cancer.png").convert_alpha()
+            hp = random.randint(150, 250)
+            attack = random.randint(7, 12)
+            defense = 5
+        elif cancer_type == "new_cancer":
+            self.__cancer_img = pygame.image.load("assets\easy_cancer.png").convert_alpha()
             hp = random.randint(80, 100)
-            attack = random.randint(5, 10)
+            attack = random.randint(3, 7)
             defense = 5
         elif cancer_type == "high_cancer":
             self.__cancer_img = pygame.image.load("assets/cancer.png").convert_alpha()  # private
             hp = random.randint(300, 400)
-            attack = random.randint(10, 15)
+            attack = random.randint(12, 14)
             defense = 10
         else:
-            self.__cancer_img = pygame.image.load("assets/cancer.png").convert_alpha()
-            hp = 100
-            attack = 5
-            defense = 5
+            raise InvalidCancerTypeError(cancer_type)
+            
 
         super().__init__(
             cancer_type.replace("_", " ").title(),
@@ -303,9 +360,6 @@ class Cancer(Character):
 
         return damage
 
-    def guard(self, attacker, logs=None):
-        self.set_is_guarding(True)
-        print(f"{self.get_name()} is guarding!")
 
     def is_alive(self):
         return self.get_hp() > 0
@@ -314,3 +368,21 @@ class Cancer(Character):
         self.__blinking = True
         self.__blink_timer = pygame.time.get_ticks() + 300
         print("cancer take dmg")
+
+def attack(target,attacker,screen):
+    try:
+        # Cek apakah attacker dan target merupakan subclass dari Character
+        if not isinstance(attacker, Character):
+            raise TypeError("Attacker must be a Character instance.")
+        if not isinstance(target, Character):
+            raise TypeError("Target must be a Character instance.")
+        if screen is None:
+            raise ValueError("Screen object is required.")
+
+        # Panggil fungsi attack dari attacker
+        return attacker.attack(target, screen)
+
+    except Exception as e:
+        print(f"Error during attack: {e}")
+        text.font_animation(f"Attack failed: {str(e)}", screen, 300, 150, 30, "red", fade_in=False)
+        return None

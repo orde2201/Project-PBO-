@@ -36,3 +36,5 @@ def attack_animation(screen, fram, asset):
     # Setelah animasi selesai, kembalikan background asli
     screen.blit(background_snapshot, anim_rect.topleft)
     pygame.display.update(anim_rect)
+
+    
