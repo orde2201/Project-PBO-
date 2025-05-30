@@ -32,13 +32,13 @@ Game akan berlanjut hingga semua monster di peta berhasil dikalahkan. Ketika sel
 1. Clone repository ini
 
    ```bash
-   git clone https://github.com/jo0707/the-adventure-of-atra.git
+   git clone https://github.com/orde2201/Project-PBO-
    ```
 
 2. Pindah ke direktori proyek
 
    ```bash
-   cd the-adventure-of-atra
+   cd Project-PBO-
    ```
 
 3. Install pygame
