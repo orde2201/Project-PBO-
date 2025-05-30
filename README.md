@@ -69,8 +69,6 @@ Game akan berlanjut hingga semua monster di peta berhasil dikalahkan. Ketika sel
 - [Design Patterns and Video Games](https://www.patternsgameprog.com/series/discover-python-and-patterns/)
 - [PyGame Tutorial: Centralized Scene Logic](https://nerdparadise.com/programming/pygame/part7)
 - [pygame.org - TUT_DESIGN](https://www.pygame.org/wiki/tut_design)
-- [PyGame: A Primer on Game Programming in Python
-  ](https://realpython.com/pygame-a-primer/)
 
 Referensi Game :
 
