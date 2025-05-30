@@ -1,8 +1,5 @@
 
-<h1 align="center"></h1>
-<p align="center">
-  <img src="screenshots/banner.png" height="196px" />
-</p>
+<h1 align="center">Cancer Hunter</h1>
 
 ## Deskripsi Proyek
 
@@ -24,8 +21,8 @@ Game akan berlanjut hingga semua monster di peta berhasil dikalahkan. Ketika sel
 
 ## Screenshots
 
-<img src="screenshots/1.png">
-<img src="screenshots/2.png">
+<img src="Photo/photo-1.png">
+<img src="Photo/photo-2.png">
 
 ## Cara Menjalankan
 
@@ -56,9 +53,16 @@ Game akan berlanjut hingga semua monster di peta berhasil dikalahkan. Ketika sel
 
 ## UML Class Diagram
 
-<img src="screenshots/uml.png">
+<img src="Photo/UML.jpg">
 
 ## Kontributor
+
+| Name                             | NIM         | Contributions                    | Github                                          | 
+|----------------------------------|-------------|----------------------------------| ------------------------------------------------|
+| I Gede Krisna Yoga Saputra       | 123140163   | Project Leader, Programmer       | [orde2201](https://github.com/orde2201)         |
+| Deva Hafid Chairul Fani          | 123140026   | Programmer, Designer, Researcher | [Deva-Abah](https://github.com/Deva-Abah)       |
+| Jonathan Nicholas Damero Sinaga  | 123140153   | Programmer, Designer, Researcher | [SinagaPande](https://github.com/SinagaPande)   |
+| Vebri Yanti                      | 123140056   | Programmer  Designer, Researcher | [02-056-Vebri](https://github.com/02-056-Vebri) |
 
 ## Referensi
 
