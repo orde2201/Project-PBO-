@@ -2,8 +2,7 @@ import pygame
 import sys
 
 pygame.init()
-screen = pygame.display.set_mode((640, 480))
-pygame.display.set_caption("Font Fade In-Out Example")
+
 clock = pygame.time.Clock()
 
 # --- METHOD FONT MILIKMU, TIDAK DIUBAH ---
