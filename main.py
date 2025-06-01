@@ -113,8 +113,10 @@ class CancerHunter:
             if start_rect.collidepoint(event.pos):
                 self._click_sound.play()
                 self.set_base_structure(2)  # Pindah ke menu pemilihan mode
-
-        # Tampilkan kursor
+##error handling
+            else :
+                    text.font_animation("Click start using left mouse for start game!!", screen, 300, 20, 20, "yellow", fade_in=False)
+            # Tampilkan kursor
         screen.blit(cursor.cursor_menu(), (self._cursor_x - 50, self._cursor_y - 50))
 
     def mode_select(self, screen, event):
@@ -128,49 +130,45 @@ class CancerHunter:
         option_rects = []
 
         # Tampilkan tombol masing-masing mode
-        for text, y in zip(texts, positions):
-            rendered = font.render(text, True, (255, 255, 255))
+        for textt, y in zip(texts, positions):
+            rendered = font.render(textt, True, (255, 255, 255))
             rect = rendered.get_rect(center=(500, y))
             screen.blit(rendered, rect)
-            option_rects.append((text.lower(), rect))  # lower agar konsisten
+            option_rects.append((textt.lower(), rect))  # lower agar konsisten
 
         # Update posisi kursor
         if event and event.type == pygame.MOUSEMOTION:
             self.set_cursor_pos(*event.pos)
 
         # Deteksi klik dan simpan mode yang dipilih
+        clicked = False
         if event and event.type == pygame.MOUSEBUTTONDOWN:
             for label, rect in option_rects:
                 if rect.collidepoint(event.pos):
                     print(f"{label.capitalize()} mode selected")
                     self.set_selected_mode(label)
                     self._click_sound.play()
-                    self.set_base_structure(3)  # Masuk ke explore mode
-
-        # Tampilkan kursor
+                    self.set_base_structure(3) # Masuk ke explore mode
+                    clicked = True 
+##error handling
+            if not clicked :
+                text.font_animation("Click game mode using left mouse for start game!!", screen, 320, 20, 20, "yellow", fade_in=False)
+                
         screen.blit(cursor.cursor_menu(), (self._cursor_x - 50, self._cursor_y - 50))
 
     def explore_mode(self, screen):
+        self._play_main_bgm()
         """Handle exploration gameplay"""
-        try:
-            # Load map
-            map_img = pygame.image.load("assets/map1.png").convert()
-            map_img = pygame.transform.scale(map_img, (2000, 1200))
-            map_rect = map_img.get_rect()
-        except pygame.error as e:
-            print(f"Error loading map image: {e}")
-            return
-        
+        # Load map
+        map_img = pygame.image.load("assets/map1.png").convert()
+        map_img = pygame.transform.scale(map_img, (2000, 1200))
+        map_rect = map_img.get_rect()
         # Load cursor / karakter
-        try:
-            player_img = pygame.image.load("assets/main_cursor.png")
-            player_img = pygame.transform.scale(player_img, (50, 50))
+        player_img = pygame.image.load("assets/main_cursor.png")
+        player_img = pygame.transform.scale(player_img, (50, 50))
 
-            cancer_img = pygame.image.load("assets/player.png")
-            cancer_img = pygame.transform.scale(cancer_img, (50, 50))
-        except pygame.error as e:
-            print(f"Error loading player or cancer images: {e}")
-            return
+        cancer_img = pygame.image.load("assets/player.png")
+        cancer_img = pygame.transform.scale(cancer_img, (50, 50))
 
         # Event
         keys = pygame.key.get_pressed()
@@ -225,7 +223,7 @@ class CancerHunter:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
                     interact_pressed = True
-
+                    
         # Proses kanker
         for cancer in self._cancers[:]:
             distance = ((self._player_pos[0] - cancer['x'])**2 +
@@ -249,13 +247,16 @@ class CancerHunter:
 
         # Info sisa musuh
         font = pygame.font.Font(None, 36)
+        typing = "Using A,S,W,D to move and enter to battle interaction with cancer"
         text_surface = font.render(f"Cancers remaining: {len(self._cancers)}", True, (255, 255, 255))
+        guide_rect = text.font(typing, screen, 320, 570, 15)
         screen.blit(text_surface, (10, 10))
 
         if len(self._cancers) == 0:
-            font = pygame.font.Font("assets/HelpMe.ttf", 72)
-            text_surface = font.render("VICTORY! All cancers defeated!", True, (255, 255, 255))
-            screen.blit(text_surface, (100, 300))
+            screen.fill((0, 0, 0))
+            text.font("VICTORY!", screen, 490, 270, 150)
+            text.font("Thanks for playing!!", screen, 490, 390, 30)
+        
             pygame.display.flip()  # Tampilkan pesan sebelum delay
             pygame.time.delay(4000)  # Tunggu 4 detik
             return True
@@ -272,27 +273,24 @@ class CancerHunter:
             self._cancer = base.Cancer(self._cancer_type, 1)
 
         # Layout
-        try:
-            background = pygame.image.load("assets/battle_background.png")
-            background_size_battle = pygame.transform.scale(background, (1000, 1000))
-            screen.blit(background_size_battle, (0, -300))
+        
+        background = pygame.image.load("assets/battle_background.png")
+        background_size_battle = pygame.transform.scale(background, (1000, 1000))
+        screen.blit(background_size_battle, (0, -300))
 
-            text_cancer = pygame.image.load("assets/cancer_stats_back.png")
-            text_cancer_size = pygame.transform.scale(text_cancer, (300, 300))
-            screen.blit(text_cancer_size, (700, 0))
+        text_cancer = pygame.image.load("assets/cancer_stats_back.png")
+        text_cancer_size = pygame.transform.scale(text_cancer, (300, 300))
+        screen.blit(text_cancer_size, (700, 0))
 
-            self._cancer.cancer_image(screen, self._cancer)
+        self._cancer.cancer_image(screen, self._cancer)
 
-            text_background = pygame.image.load("assets/text_background.png")
-            text_background_size = pygame.transform.scale(text_background, (1000, 1000))
-            screen.blit(text_background_size, (100, 0))
+        text_background = pygame.image.load("assets/text_background.png")
+        text_background_size = pygame.transform.scale(text_background, (1000, 1000))
+        screen.blit(text_background_size, (100, 0))
 
-            # Player image
-            base.Player.player_image(screen)
-        except pygame.error as e:
-            print(f"Error loading battle images: {e}")
-            return
-
+        # Player image
+        base.Player.player_image(screen)
+    
         # Stats player
         lvl = self._player.get_level()
         hp_now = self._player.get_hp()
@@ -332,24 +330,25 @@ class CancerHunter:
                     # Reset cancer for next battle
                     self._cancer = None
                     return 2
-                
                 text.font_animation("Cancer attack", screen, random.randrange(270, 600), 
                                   random.randrange(100, 300), 60, "green", fade_in=False)
                 base.attack(self._player,self._cancer, screen)
                 if not self._player.is_alive():
+                    self._play_main_bgm()
                     print("game over")
                     return True
             
             # Guard
-            if guard_rect.collidepoint(event.pos):
+            elif guard_rect.collidepoint(event.pos):
                 self._player.guard()
                 self._cancer.attack(self._player, screen)
                 if not self._player.is_alive():
+                    self._play_main_bgm()
                     print("game over")
                     return True
 
             # Skill
-            if skill_rect.collidepoint(event.pos):
+            elif skill_rect.collidepoint(event.pos):
                 energy_empty = self._player.use_skill("basic_skill", self._cancer, screen)
                 if energy_empty:
                     if not self._cancer.is_alive():
@@ -361,11 +360,12 @@ class CancerHunter:
                     
                     self._cancer.attack(self._player, screen)
                     if not self._player.is_alive():
+                        self._play_main_bgm()
                         print("game over")
                         return True
             
             # Ultimate
-            if ultimate_rect.collidepoint(event.pos):
+            elif ultimate_rect.collidepoint(event.pos):
                 energy_empty = self._player.use_skill("special_attack", self._cancer, screen)
                 if energy_empty:
                     if not self._cancer.is_alive():
@@ -378,15 +378,20 @@ class CancerHunter:
                     self._cancer.attack(self._player, screen)
                     if not self._player.is_alive():
                         print("game over")
+                        self._play_main_bgm()
                         return True
             # Buff
-            if buff_rect.collidepoint(event.pos):
+            elif buff_rect.collidepoint(event.pos):
                 buff_status = self._player.use_crit_buff(screen)
                 if buff_status:
                     base.attack(self._player, self._cancer, screen)
                     if not self._player.is_alive():
                         print("game over")
+                        self._play_main_bgm()
                         return True
+            
+            else :
+                text.font_animation("Click attack, guard, skill, ultimate, or buff for do action!!", screen, 380, 20, 20, "yellow", fade_in=False)
         return None
 
 
@@ -422,7 +427,6 @@ def main():
                         # Tampilkan gambar game over selama 7 detik
                         game_over_img = pygame.image.load("assets/game_over_vignet.png").convert()
                         game_over_img = pygame.transform.scale(game_over_img, (1000, 600))
-                        
                         start_time = pygame.time.get_ticks()
                         while pygame.time.get_ticks() - start_time < 7000:
                             for e in pygame.event.get():
