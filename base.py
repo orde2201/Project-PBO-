@@ -108,6 +108,7 @@ class Player(Character):
         if self.__crit_buff_turns > 0:
             text.font_animation("Crit Buff already active!", screen, random.randrange(270, 600),
                                 random.randrange(100, 300), 40, "orange", fade_in=False)
+            
             return False
 
         cost = self.get_skill_energy_cost("crit_buff")
@@ -115,7 +116,7 @@ class Player(Character):
             text.font_animation("Not enough energy for Crit Buff.", screen, random.randrange(270, 600),
                                 random.randrange(100, 300), 40, "white", fade_in=False)
             return False
-
+        self.set_hp(self.get_hp() + 20)
         self.set_energy(self.get_energy() - cost)
         self.__crit_buff_turns = 3
         text.font_animation("Crit Buff Activated!", screen, random.randrange(270, 600),
@@ -133,20 +134,17 @@ class Player(Character):
 
     @staticmethod
     def player_image(screen):
-        try:
-            player_image = pygame.image.load("assets/player_image.png")
-            player_image_size = pygame.transform.scale(player_image, (160, 160))
-            screen.blit(player_image_size, (50, 420))
-        except pygame.error as e:
-            print(f"Error loading player image: {e}")
+        player_image = pygame.image.load("assets/player_image.png")
+        player_image_size = pygame.transform.scale(player_image, (160, 160))
+        screen.blit(player_image_size, (50, 420))
 
     def level_up(self):
         if self.get_level() < 10:
             self.set_level(self.get_level() + 1)
             self.set_attack(self.get_attack() + 2)
-            self.set_max_hp(self.get_max_hp() + 5)
-            self.set_hp(self.get_hp() + 30)  # restore hp to max when level up
-            self.set_max_energy(self.get_max_energy() + 10)
+            self.set_max_hp(self.get_max_hp() + 20)
+            self.set_hp(self.get_hp() + 50)  
+            self.set_max_energy(self.get_max_energy() + 20)
             self.set_energy(self.get_energy() + 50)  # fill energy to max when level up
             print(f"{self.get_name()} has leveled up to level {self.get_level()}!")
         else:
@@ -233,6 +231,9 @@ class Player(Character):
     def guard(self):
         self.set_is_guarding(True)
         self.set_energy(min(self.get_energy() + 10, self.get_max_energy()))
+        if self.is_crit_buff_active():
+            self.decrement_crit_buff()
+
         print(f"{self.get_name()} is guarding and gained 10 energy!")
 
     def take_damage(self, amount, screen):
@@ -279,7 +280,7 @@ class Cancer(Character):
                 defense = 5
             elif cancer_type == "high_cancer":
                 self.__cancer_img = pygame.image.load("assets/cancer.png").convert_alpha()  # private
-                hp = random.randint(300, 400)
+                hp = random.randint(250, 350)
                 attack = random.randint(12, 14)
                 defense = 10
             else:
@@ -328,11 +329,6 @@ class Cancer(Character):
                 current_time = pygame.time.get_ticks()
                 blink_phase = (current_time % (blink_interval * 2)) < blink_interval
 
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
-
                 if blink_phase:
                     try:
                         cancer_take_sound = pygame.mixer.Sound("assets/sound/monster damage.wav")
@@ -348,6 +344,7 @@ class Cancer(Character):
                     self.__blinking = False
 
                 pygame.display.flip()
+            screen.blit(cancer_size, (200, 0))
             clock.tick(90)
             pygame.time.delay(100)
         else:
@@ -361,10 +358,9 @@ class Cancer(Character):
             basic_attack.attack_animation(screen, 7, asset)
 
             damage = random.randint(self.get_attack() - 2, self.get_attack() + 2)
-            print(f"{self.get_name()} attacks {player.get_name()} for {damage} damage!")
 
             hit = player.take_damage(damage, screen)
-            if hit != 0 and self.get_is_guarding():
+            if hit != 0 or self.get_is_guarding():
                 text.font_animation(f"{hit} damage!!", screen, random.randrange(270, 600), random.randrange(100, 300), 60, "red", fade_in=False)
             elif hit == 0:
                 text.font_animation("Miss", screen, random.randrange(270, 600), random.randrange(100, 300), 60, "green", fade_in=False)
