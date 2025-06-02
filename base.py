@@ -74,6 +74,10 @@ class Character(ABC):
     def is_alive(self):
         return self.get_hp() > 0
 
+    @abstractmethod
+    def take_damage(self):
+        pass
+
 
 # --- Player class ---
 class Player(Character):
@@ -153,9 +157,8 @@ class Player(Character):
     def attack(self, cancer, screen=None):
         attack_sound = pygame.mixer.Sound("assets/sound/draw-sword1-44724.mp3")
         attack_sound.play()
-        if screen:
-            asset = "assets/slash_basic/warrior_skill1_frame"
-            basic_attack.attack_animation(screen, 10, asset)
+        asset = "assets/slash_basic/warrior_skill1_frame"
+        basic_attack.attack_animation(screen, 10, asset)
 
         crit = False
         base_damage = random.randint(self.get_attack() - 2, self.get_attack() + 2)
