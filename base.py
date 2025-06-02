@@ -151,6 +151,8 @@ class Player(Character):
             text.font_animation("Level Maximum!", screen, random.randrange(270, 600), random.randrange(100, 300), 40, "white", fade_in=False)
 
     def attack(self, cancer, screen=None):
+        attack_sound = pygame.mixer.Sound("assets/sound/draw-sword1-44724.mp3")
+        attack_sound.play()
         if screen:
             asset = "assets/slash_basic/warrior_skill1_frame"
             basic_attack.attack_animation(screen, 10, asset)
@@ -178,6 +180,7 @@ class Player(Character):
         return damage
 
     def use_skill(self, skill_name, target, screen):
+        
         cost = self.__skill_energy_cost.get(skill_name)
         if cost is None:
             print(f"Skill {skill_name} not found.")
@@ -192,12 +195,16 @@ class Player(Character):
 
         try:
             if skill_name == "basic_skill":
+                attack_sound = pygame.mixer.Sound("assets/sound/draw-sword1-44724.mp3")
+                attack_sound.play()
                 asset = "assets/slash_skill/warrior_skill4_frame"
                 basic_attack.attack_animation(screen, 7, asset)
                 target.take_damage()
                 target.cancer_image(screen, target)
                 damage = self.get_attack() * 3
             elif skill_name == "special_attack":
+                attack_sound = pygame.mixer.Sound("assets/sound/draw-sword1-44724.mp3")
+                attack_sound.play()
                 asset = "assets/slash_skill/warrior_skill4_frame"
                 basic_attack.attack_animation(screen, 7, asset)
                 asset = "assets/slash_basic/warrior_skill1_frame"
@@ -374,6 +381,7 @@ class Cancer(Character):
         return self.get_hp() > 0
 
     def take_damage(self):
+       
         self.__blinking = True
         self.__blink_timer = pygame.time.get_ticks() + 300
         print("cancer take dmg")
